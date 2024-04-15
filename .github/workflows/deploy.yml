@@ -27,6 +27,6 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
           BRANCH: gh-pages # Change to your GitHub Pages branch if different
-          FOLDER: dist/your-angular-app # Adjust folder path based on your Angular project structure
+          FOLDER: dist/demo-angular # Adjust folder path based on your Angular project structure
