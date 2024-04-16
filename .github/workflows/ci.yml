@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main  # Change to your default branch
+  pull_request:
+    branches:
+      - main  # Change to your default branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18.10.0'  # Change to your desired Node.js version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Angular app
+        run: npm run build --prod
+
+      - name: Run tests
+        run: npm test -- --watch=false --code-coverage
+
+      - name: Lint code
+        run: npm run lint
+
+  commit_message_check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check commit message
+        uses: gsactions/commit-message-checker@v2
+        with:
+          pattern: '^(?!\s*#).{1,74}$'  # Ensure that the first line (excluding comments) does not exceed 74 characters
+          error: 'The maximum line length of 74 characters is exceeded or commit message is not in proper format.'
+          excludeDescription: 'true'  # Exclude the description body of a pull request (optional)
+          excludeTitle: 'true'  # Exclude the title of a pull request (optional)
+          checkAllCommitMessages: 'true'  # Check all commits associated with a pull request (optional)
+          accessToken: ${{ secrets.GITHUB_TOKEN }}  # GitHub access token is required if checkAllCommitMessages is true
