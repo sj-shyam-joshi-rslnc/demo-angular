@@ -26,7 +26,48 @@ jobs:
 
       - name: Build Angular app
         run: npm run build --prod
+        
+  commit_message_check:
+    runs-on: ubuntu-latest
 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check commit messages
+        id: commit_message_check
+        run: |
+          commit_messages=$(git log --pretty=%s ${{ github.event.before }}..${{ github.sha }})
+          errors=0
+          for message in $commit_messages; do
+            if [[ ! $message =~ ^[A-Z] ]]; then
+              echo "ERROR: Commit message does not start with a capital letter: $message"
+              errors=$((errors + 1))
+            fi
+          done
+          if [ $errors -gt 0 ]; then
+            echo "Found $errors commit message errors."
+            exit 1
+          else
+            echo "Commit message check passed."
+          fi
+
+      - name: Set commit message check status
+        if: always()
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const status = {
+              name: 'Commit Message Check',
+              conclusion: '${{ job.status }}',
+              output: {
+                title: 'Commit Message Check',
+                summary: 'Commit message validation completed.',
+              },
+            };
+            github.checks.create(context.repo, status)
+            
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: JamesIves/github-pages-deploy-action@4.1.5
