@@ -27,46 +27,30 @@ jobs:
       - name: Build Angular app
         run: npm run build --prod
         
-  commit_message_check:
+  check-commit-message:
+    name: Check Commit Message
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Check commit messages
-        id: commit_message_check
-        run: |
-          commit_messages=$(git log --pretty=%s ${{ github.event.before }}..${{ github.sha }})
-          errors=0
-          for message in $commit_messages; do
-            if [[ ! $message =~ ^[A-Z] ]]; then
-              echo "ERROR: Commit message does not start with a capital letter: $message"
-              errors=$((errors + 1))
-            fi
-          done
-          if [ $errors -gt 0 ]; then
-            echo "Found $errors commit message errors."
-            exit 1
-          else
-            echo "Commit message check passed."
-          fi
-
-      - name: Set commit message check status
-        if: always()
-        uses: actions/github-script@v5
+      - name: Check Commit Type
+        uses: gsactions/commit-message-checker@v2
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const status = {
-              name: 'Commit Message Check',
-              conclusion: '${{ job.status }}',
-              output: {
-                title: 'Commit Message Check',
-                summary: 'Commit message validation completed.',
-              },
-            };
-            github.checks.create(context.repo, status)
+          pattern: '\[[^]]+\] .+$'
+          flags: 'gm'
+          error: 'Your first line has to contain a commit type like "[BUGFIX]".'
+      - name: Check Line Length
+        uses: gsactions/commit-message-checker@v2
+        with:
+          pattern: '^[^#].{74}'
+          error: 'The maximum line length of 74 characters is exceeded.'
+          excludeDescription: 'true' # optional: this excludes the description body of a pull request
+          excludeTitle: 'true' # optional: this excludes the title of a pull request
+          checkAllCommitMessages: 'true' # optional: this checks all commits associated with a pull request
+          accessToken: ${{ secrets.GITHUB_TOKEN }} # github access token is only required if checkAllCommitMessages is true
+      - name: Check for Resolves / Fixes
+        uses: gsactions/commit-message-checker@v2
+        with:
+          pattern: '^.+(Resolves|Fixes): \#[0-9]+$'
+          error: 'You need at least one "Resolves|Fixes: #<issue number>" line.'
             
       - name: Deploy to GitHub Pages
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
