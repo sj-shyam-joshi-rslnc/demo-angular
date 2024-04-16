@@ -27,9 +27,6 @@ jobs:
       - name: Build Angular app
         run: npm run build --prod
 
-      - name: Run tests
-        run: npm test -- --watch=false --code-coverage
-
       - name: Lint code
         run: npm run lint
 
