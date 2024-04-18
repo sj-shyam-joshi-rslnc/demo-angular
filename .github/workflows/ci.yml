@@ -30,6 +30,24 @@ jobs:
       - name: Lint code
         run: npm run lint
 
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18.10.0'  # Change to your desired Node.js version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint code
+        run: npm run lint
+
   commit_message_check:
     runs-on: ubuntu-latest
 
@@ -46,3 +64,19 @@ jobs:
           excludeTitle: 'true'  # Exclude the title of a pull request (optional)
           checkAllCommitMessages: 'true'  # Check all commits associated with a pull request (optional)
           accessToken: ${{ secrets.GITHUB_TOKEN }}  # GitHub access token is required if checkAllCommitMessages is true
+
+  pr-title-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check PR title format
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const titleRegex = /^(feat|fix|docs|style|refactor|test|chore)\(.*?\): .*/i;
+            const title = github.context.payload.pull_request.title;
+
+            if (!title.match(titleRegex)) {
+              core.setFailed('PR title format is incorrect. Please follow the format: "(type): Description"');
+            }
