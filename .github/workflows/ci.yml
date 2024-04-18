@@ -72,6 +72,7 @@ jobs:
       - name: Check PR title format
         run: |
           titleRegex="^(feat|fix|docs|style|refactor|test|chore)\(.*?\): .*"
+          echo ${{ github.event.pull_request.title }}
           if [[ ! "${{ github.event.pull_request.title }}" =~ $titleRegex ]]; then
             echo "PR title format is incorrect. Please follow the format: '(type): Description'"
             exit 1
