@@ -75,7 +75,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const titleRegex = /^(feat|fix|docs|style|refactor|test|chore)\(.*?\): .*/i;
-            const title = github.context.payload.pull_request.title;
+            const title = github.event.pull_request.title;
 
             if (!title.match(titleRegex)) {
               core.setFailed('PR title format is incorrect. Please follow the format: "(type): Description"');
