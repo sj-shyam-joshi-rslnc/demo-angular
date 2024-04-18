@@ -70,13 +70,9 @@ jobs:
 
     steps:
       - name: Check PR title format
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const titleRegex = /^(feat|fix|docs|style|refactor|test|chore)\(.*?\): .*/i;
-            const title = github.context.payload.pull_request.title;
-
-            if (!title.match(titleRegex)) {
-              core.setFailed('PR title format is incorrect. Please follow the format: "(type): Description"');
-            }
+        run: |
+          titleRegex="^(feat|fix|docs|style|refactor|test|chore)\(.*?\): .*"
+          if [[ ! "${{ github.event.pull_request.title }}" =~ $titleRegex ]]; then
+            echo "PR title format is incorrect. Please follow the format: '(type): Description'"
+            exit 1
+          fi
