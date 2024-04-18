@@ -66,6 +66,7 @@ jobs:
           accessToken: ${{ secrets.GITHUB_TOKEN }}  # GitHub access token is required if checkAllCommitMessages is true
 
   pr-title-check:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
 
     steps:
